@@ -43,7 +43,6 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 BASE_URL = "https://www.made-in-china.com"
 TEXT_SEARCH_URL = f"{BASE_URL}/productdirectory.do"
 IMAGE_UPLOAD_URL = "https://file.made-in-china.com/img-search/upload"
-DEFAULT_SEARCH_TERM = "glass shower hinge"
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
@@ -119,8 +118,7 @@ def normalize_actor_input(actor_input: dict | None) -> dict:
     image_urls = normalize_string_list(result.get("imageUrls"))
 
     if search_mode == "keyword" and not search_terms:
-        Actor.log.warning("No product keywords were provided. Using the example keyword %r.", DEFAULT_SEARCH_TERM)
-        search_terms = [DEFAULT_SEARCH_TERM]
+        raise ValueError("Keyword search requires at least one product keyword.")
 
     if search_mode == "image" and not (
         uploaded_images
@@ -128,9 +126,7 @@ def normalize_actor_input(actor_input: dict | None) -> dict:
         or normalize_string_list(result.get("searchImages"))
         or normalize_string_list(result.get("searchImageKeys"))
     ):
-        Actor.log.warning("Image search was selected without an image. Falling back to the example keyword search.")
-        search_mode = "keyword"
-        search_terms = [DEFAULT_SEARCH_TERM]
+        raise ValueError("Image search requires at least one uploaded image or public image URL.")
 
     result.update(
         {
@@ -151,7 +147,7 @@ def normalize_actor_input(actor_input: dict | None) -> dict:
             "includeSupplierDetails": bool(result.get("includeSupplierDetails", True)),
             "skipFailedImages": bool(result.get("skipFailedImages", True)),
             "failOnNoResults": bool(result.get("failOnNoResults", False)),
-            "saveCsvFile": bool(result.get("saveCsvFile", False)),
+            "saveCsvFile": bool(result.get("saveCsvFile", True)),
             "csvOutputMode": str(result.get("csvOutputMode") or "combined"),
             "csvFilename": safe_filename(
                 str(result.get("csvFilename") or "made_in_china_results.csv"),
@@ -931,12 +927,17 @@ async def save_csv_outputs(rows: list[dict], filename: str, mode: str) -> None:
 async def main() -> None:
     async with Actor:
         actor_input = normalize_actor_input(await Actor.get_input())
-        Actor.log.info(
-            "Starting %s search with %s keyword(s) and %s image URL/upload value(s).",
-            actor_input["searchMode"],
-            len(actor_input["searchTerms"]),
-            len(actor_input["imageUrls"]) + len(actor_input["uploadedImages"]),
-        )
+        if actor_input["searchMode"] == "image":
+            image_input_count = sum(
+                len(actor_input.get(field) or [])
+                for field in ("imageUrls", "uploadedImages", "searchImages", "searchImageKeys")
+            )
+            Actor.log.info("Starting image search with %s image input(s).", image_input_count)
+        else:
+            Actor.log.info(
+                "Starting keyword search with %s keyword input(s).",
+                len(actor_input["searchTerms"]),
+            )
 
         proxy_url = await get_proxy_url(actor_input["useApifyProxy"])
         session = build_http_session(proxy_url=proxy_url)
@@ -984,6 +985,6 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    logging.info("Launching Made-in-China Product & Supplier Finder process.")
+    logging.info("Launching Made-in-China Product & Supplier Scraper process.")
     if not os.environ.get("ACTOR_STARTUP_CHECK"):
         asyncio.run(main())
