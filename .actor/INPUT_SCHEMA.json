@@ -1,0 +1,133 @@
+{
+  "title": "Made-in-China Product & Supplier Finder Input",
+  "description": "Find unique Made-in-China suppliers using product keywords, uploaded product images, or public image URLs. Choose one search mode and provide the matching inputs. Fields for the other mode are ignored.",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "searchMode": {
+      "title": "Search mode",
+      "type": "string",
+      "description": "Choose keyword search for product terms or image search for product photos.",
+      "enum": ["keyword", "image"],
+      "enumTitles": ["Keyword search", "Image search"],
+      "default": "keyword",
+      "editor": "select"
+    },
+    "searchTerms": {
+      "title": "Product keywords",
+      "type": "array",
+      "description": "Used in keyword mode. Add one specific product query per row, such as stainless steel glass shower hinge.",
+      "editor": "stringList",
+      "items": {"type": "string", "minLength": 1},
+      "maxItems": 20,
+      "prefill": ["glass shower hinge"],
+      "sectionCaption": "Keyword search",
+      "sectionDescription": "These fields are used only when Search mode is Keyword search."
+    },
+    "maxUniqueSuppliersPerKeyword": {
+      "title": "Maximum suppliers per keyword",
+      "type": "integer",
+      "description": "Maximum number of unique suppliers returned separately for each product keyword.",
+      "default": 10,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "maxPagesText": {
+      "title": "Maximum pages per keyword",
+      "type": "integer",
+      "description": "Maximum number of Made-in-China result pages processed for each keyword.",
+      "default": 1,
+      "minimum": 1,
+      "maximum": 99
+    },
+    "uploadedImages": {
+      "title": "Product images",
+      "type": "array",
+      "description": "Used in image mode. Upload up to 20 clear JPG, PNG, WebP, GIF, or BMP product images. WebP and GIF files are converted automatically because Made-in-China accepts JPG, PNG, and BMP uploads. Each image is searched separately.",
+      "editor": "fileupload",
+      "items": {"type": "string"},
+      "maxItems": 20,
+      "prefill": [],
+      "sectionCaption": "Image search",
+      "sectionDescription": "These fields are used only when Search mode is Image search."
+    },
+    "imageUrls": {
+      "title": "Public product image URLs",
+      "type": "array",
+      "description": "Used in image mode and recommended for API or MCP clients. Add direct, publicly accessible HTTP or HTTPS image URLs. The combined upload and URL limit is 20 images.",
+      "editor": "stringList",
+      "items": {"type": "string", "pattern": "^https?://"},
+      "maxItems": 20,
+      "prefill": []
+    },
+    "maxUniqueSuppliersPerImage": {
+      "title": "Maximum suppliers per image",
+      "type": "integer",
+      "description": "Maximum number of unique suppliers returned separately for each image.",
+      "default": 10,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "maxPagesImage": {
+      "title": "Maximum result batches per image",
+      "type": "integer",
+      "description": "Each Made-in-China image-search batch contains up to 20 products. The website currently provides at most five batches.",
+      "default": 1,
+      "minimum": 1,
+      "maximum": 5
+    },
+    "useApifyProxy": {
+      "title": "Use Apify Proxy",
+      "type": "boolean",
+      "description": "Recommended for more reliable access when Made-in-China limits direct traffic.",
+      "default": true,
+      "sectionCaption": "Run settings",
+      "sectionDescription": "Shared behavior for keyword and image searches."
+    },
+    "includeSupplierDetails": {
+      "title": "Include supplier profile details",
+      "type": "boolean",
+      "description": "Visit each accepted public supplier profile to add business type, main products, location, establishment year, employee count, address, member history, rating, and response time. Disable for faster runs.",
+      "default": true
+    },
+    "skipFailedImages": {
+      "title": "Skip failed images",
+      "type": "boolean",
+      "description": "Continue with the remaining images if one image cannot be downloaded, uploaded, or searched.",
+      "default": true
+    },
+    "failOnNoResults": {
+      "title": "Fail when no results are found",
+      "type": "boolean",
+      "description": "When enabled, fail the run if no usable supplier rows are produced. Otherwise, finish with a warning and diagnostic files.",
+      "default": false
+    },
+    "saveCsvFile": {
+      "title": "Save CSV files",
+      "type": "boolean",
+      "description": "Save CSV files to the run's key-value store in addition to the structured dataset.",
+      "default": false,
+      "sectionCaption": "CSV export",
+      "sectionDescription": "Optional file exports. Dataset output is always available."
+    },
+    "csvOutputMode": {
+      "title": "CSV output mode",
+      "type": "string",
+      "description": "Save one combined CSV, separate files for each keyword or image, or both.",
+      "enum": ["combined", "separate", "both"],
+      "enumTitles": ["Combined CSV", "Separate CSV files", "Combined and separate files"],
+      "default": "combined",
+      "editor": "select"
+    },
+    "csvFilename": {
+      "title": "Combined CSV filename",
+      "type": "string",
+      "description": "Filename used when a combined CSV is requested.",
+      "default": "made_in_china_results.csv",
+      "minLength": 1,
+      "maxLength": 160,
+      "editor": "textfield"
+    }
+  },
+  "required": ["searchMode"]
+}
