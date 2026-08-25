@@ -985,6 +985,6 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    logging.info("Launching Made-in-China Product & Supplier Finder process.")
+    logging.info("Launching Made-in-China Product & Supplier Scraper process.")
     if not os.environ.get("ACTOR_STARTUP_CHECK"):
         asyncio.run(main())

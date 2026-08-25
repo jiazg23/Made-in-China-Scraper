@@ -1,6 +1,6 @@
 ## 0.1
 
-- Initial Made-in-China Product & Supplier Finder release.
+- Initial Made-in-China Product & Supplier Scraper (Reverse Image Search) release.
 - Added multi-keyword product search with a separate supplier limit per keyword.
 - Added batch reverse-image search for uploaded images and public image URLs, with a separate supplier limit per image.
 - Added one-row-per-supplier aggregation with every matched product and source input preserved.

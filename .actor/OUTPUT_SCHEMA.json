@@ -1,6 +1,6 @@
 {
   "actorOutputSchemaVersion": 1,
-  "title": "Made-in-China Product & Supplier Finder output",
+  "title": "Made-in-China Product & Supplier Scraper output",
   "description": "MCP- and API-friendly links to one-row-per-supplier results, optional CSV exports, the run summary, and diagnostic files.",
   "type": "object",
   "properties": {

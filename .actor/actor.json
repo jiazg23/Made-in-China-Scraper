@@ -1,7 +1,7 @@
 {
   "actorSpecification": 1,
   "name": "made-in-china-supplier-finder",
-  "title": "Made-in-China Product & Supplier Finder",
+  "title": "Made-in-China Product & Supplier Scraper (Reverse Image Search)",
   "description": "Search Made-in-China by keyword or product image. Find unique suppliers and extract audit badges, profiles, prices, MOQ, attributes, and product links for sourcing, API, and MCP workflows.",
   "version": "0.1",
   "input": "./INPUT_SCHEMA.json",

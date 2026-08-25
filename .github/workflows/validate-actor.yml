@@ -44,4 +44,4 @@ jobs:
             "import apify, bs4, PIL, requests; print('dependencies ok')"
           startup_output="$(docker run --rm -e ACTOR_STARTUP_CHECK=1 made-in-china-supplier-finder:test 2>&1)"
           printf '%s\n' "$startup_output"
-          grep -F "Launching Made-in-China Product & Supplier Finder process." <<< "$startup_output"
+          grep -F "Launching Made-in-China Product & Supplier Scraper process." <<< "$startup_output"

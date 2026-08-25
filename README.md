@@ -1,4 +1,4 @@
-# Made-in-China Product & Supplier Finder
+# Made-in-China Product & Supplier Scraper (Reverse Image Search)
 
 Search Made-in-China.com by product keyword or product image and get one structured row per unique supplier—not one row per listing. This Apify Actor combines product discovery, reverse-image search, supplier-profile enrichment, pricing, MOQ, audit badges, and source links in a dataset built for sourcing teams, automations, APIs, and AI clients connected through Apify MCP.
 
@@ -22,7 +22,7 @@ For a connection limited to this Actor, use:
 https://mcp.apify.com/?tools=jzgautomation/made-in-china-supplier-finder
 ```
 
-Then sign in to Apify, authorize the connection, and ask the AI to use **Made-in-China Product & Supplier Finder**.
+Then sign in to Apify, authorize the connection, and ask the AI to use **Made-in-China Product & Supplier Scraper (Reverse Image Search)**.
 
 Clients that use a JSON MCP configuration can use:
 
@@ -44,11 +44,11 @@ Clients that use a JSON MCP configuration can use:
 
 ### Ask for a keyword search
 
-> Use Apify to run Made-in-China Product & Supplier Finder for “stainless steel glass shower hinge.” Find 10 unique suppliers and return supplier names, profile URLs, audit status, product links, displayed prices, MOQs, business types, and locations.
+> Use Apify to run Made-in-China Product & Supplier Scraper for “stainless steel glass shower hinge.” Find 10 unique suppliers and return supplier names, profile URLs, audit status, product links, displayed prices, MOQs, business types, and locations.
 
 ### Ask for an image search
 
-> Use Apify to run Made-in-China Product & Supplier Finder with this public product image URL: https://example.com/product.jpg. Find 10 unique suppliers and return their profile URLs, matching products, displayed prices, MOQs, and audit badges.
+> Use Apify to run Made-in-China Product & Supplier Scraper with this public product image URL: https://example.com/product.jpg. Find 10 unique suppliers and return their profile URLs, matching products, displayed prices, MOQs, and audit badges.
 
 The AI sends public image searches through `imageUrls`:
 
@@ -73,7 +73,7 @@ These prompts combine an Actor run with analysis performed by the AI after it re
 
 #### Compare several product searches
 
-> Use Apify to run Made-in-China Product & Supplier Finder for “glass shower hinge,” “stainless steel glass clamp,” and “frameless shower door hardware.” Collect up to 10 unique suppliers per keyword using one page per keyword. Return the raw dataset, then create a comparison table with supplier name, profile URL, matching keyword, product, displayed price, MOQ, location, business type, membership, and audit status. Clearly mark missing values instead of guessing.
+> Use Apify to run Made-in-China Product & Supplier Scraper for “glass shower hinge,” “stainless steel glass clamp,” and “frameless shower door hardware.” Collect up to 10 unique suppliers per keyword using one page per keyword. Return the raw dataset, then create a comparison table with supplier name, profile URL, matching keyword, product, displayed price, MOQ, location, business type, membership, and audit status. Clearly mark missing values instead of guessing.
 
 #### Build an audited-supplier shortlist
 
@@ -81,11 +81,11 @@ These prompts combine an Actor run with analysis performed by the AI after it re
 
 #### Compare suppliers from multiple images
 
-> Run Made-in-China Product & Supplier Finder for [IMAGE URL 1], [IMAGE URL 2], and [IMAGE URL 3] in one batch. Collect up to 10 suppliers separately for each image, enable Apify Proxy, and save separate CSV files. Identify suppliers appearing in more than one image search and compare their matching products, displayed prices, MOQs, locations, business types, and audit badges.
+> Run Made-in-China Product & Supplier Scraper for [IMAGE URL 1], [IMAGE URL 2], and [IMAGE URL 3] in one batch. Collect up to 10 suppliers separately for each image, enable Apify Proxy, and save separate CSV files. Identify suppliers appearing in more than one image search and compare their matching products, displayed prices, MOQs, locations, business types, and audit badges.
 
 #### Verify that results match the requested product
 
-> Run Made-in-China Product & Supplier Finder for “[PRODUCT KEYWORD]” or [PUBLIC IMAGE URL]. Do not assume that Made-in-China's ranking means every result is relevant. Classify each returned listing as **exact match**, **likely variant**, **unrelated**, or **unverified**. Compare the product title, result image, visible attributes, and product page with my original request. Give a short evidence-based reason, exclude unrelated results from the recommended shortlist, and preserve the complete raw Actor dataset separately.
+> Run Made-in-China Product & Supplier Scraper for “[PRODUCT KEYWORD]” or [PUBLIC IMAGE URL]. Do not assume that Made-in-China's ranking means every result is relevant. Classify each returned listing as **exact match**, **likely variant**, **unrelated**, or **unverified**. Compare the product title, result image, visible attributes, and product page with my original request. Give a short evidence-based reason, exclude unrelated results from the recommended shortlist, and preserve the complete raw Actor dataset separately.
 
 Recommended response columns:
 
@@ -125,11 +125,11 @@ Corresponding input:
 
 #### Run a strict diagnostic test
 
-> Test Made-in-China Product & Supplier Finder with one keyword, one page, and five suppliers. Enable Apify Proxy and set `failOnNoResults` to `true`. If the run fails or returns no rows, retrieve the run log, `RUN_SUMMARY.json`, and any diagnostic HTML, then report the most likely cause.
+> Test Made-in-China Product & Supplier Scraper with one keyword, one page, and five suppliers. Enable Apify Proxy and set `failOnNoResults` to `true`. If the run fails or returns no rows, retrieve the run log, `RUN_SUMMARY.json`, and any diagnostic HTML, then report the most likely cause.
 
 #### Return integration-ready JSON
 
-> Run Made-in-China Product & Supplier Finder for “pet grooming brush self cleaning.” Return up to 10 unique suppliers. Preserve the Actor's original field names and return valid JSON only so I can pass the results to another automation.
+> Run Made-in-China Product & Supplier Scraper for “pet grooming brush self cleaning.” Return up to 10 unique suppliers. Preserve the Actor's original field names and return valid JSON only so I can pass the results to another automation.
 
 **Prompting tip:** ask the AI to preserve source URLs, distinguish Made-in-China badges from independent verification, mark unavailable data as missing, and avoid inventing certifications, contact details, prices, or supplier claims.
 

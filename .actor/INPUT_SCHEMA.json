@@ -1,5 +1,5 @@
 {
-  "title": "Made-in-China Product & Supplier Finder Input",
+  "title": "Made-in-China Product & Supplier Scraper Input",
   "description": "Find unique Made-in-China suppliers using product keywords, uploaded product images, or public image URLs. Choose one search mode and complete its matching section; fields for the other mode are ignored. For batch duration, use Apify's native Timeout setting in Run options.",
   "type": "object",
   "schemaVersion": 1,
