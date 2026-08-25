@@ -1,13 +1,13 @@
 {
   "actorOutputSchemaVersion": 1,
   "title": "Made-in-China Product & Supplier Finder output",
-  "description": "Links to the structured supplier dataset and optional CSV or diagnostic files created by the run.",
+  "description": "MCP- and API-friendly links to one-row-per-supplier results, optional CSV exports, the run summary, and diagnostic files.",
   "type": "object",
   "properties": {
     "results": {
       "type": "string",
       "title": "Supplier results",
-      "description": "Structured Made-in-China product and supplier records from the default dataset.",
+      "description": "Unique Made-in-China supplier records with source inputs, matched products, pricing, MOQ, audit badges, and available public profile details.",
       "template": "{{links.apiDefaultDatasetUrl}}/items"
     },
     "files": {

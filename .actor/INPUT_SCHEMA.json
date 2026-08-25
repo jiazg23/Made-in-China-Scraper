@@ -1,13 +1,13 @@
 {
   "title": "Made-in-China Product & Supplier Finder Input",
-  "description": "Find unique Made-in-China suppliers using product keywords, uploaded product images, or public image URLs. Choose one search mode and provide the matching inputs. Fields for the other mode are ignored.",
+  "description": "Find unique Made-in-China suppliers using product keywords, uploaded product images, or public image URLs. Choose one search mode and complete its matching section; fields for the other mode are ignored. For batch duration, use Apify's native Timeout setting in Run options.",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
     "searchMode": {
       "title": "Search mode",
       "type": "string",
-      "description": "Choose keyword search for product terms or image search for product photos.",
+      "description": "Choose Keyword search for product terms or Image search for uploaded files and public image URLs.",
       "enum": ["keyword", "image"],
       "enumTitles": ["Keyword search", "Image search"],
       "default": "keyword",
@@ -16,18 +16,18 @@
     "searchTerms": {
       "title": "Product keywords",
       "type": "array",
-      "description": "Used in keyword mode. Add one specific product query per row, such as stainless steel glass shower hinge.",
+      "description": "Used only in Keyword search. Add one specific product query per row, such as stainless steel glass shower hinge. Image searches ignore this field.",
       "editor": "stringList",
       "items": {"type": "string", "minLength": 1},
       "maxItems": 20,
-      "prefill": ["glass shower hinge"],
+      "prefill": [],
       "sectionCaption": "Keyword search",
-      "sectionDescription": "These fields are used only when Search mode is Keyword search."
+      "sectionDescription": "These fields are used only when Search mode is Keyword search. Enter at least one product keyword before starting the run."
     },
     "maxUniqueSuppliersPerKeyword": {
       "title": "Maximum suppliers per keyword",
       "type": "integer",
-      "description": "Maximum number of unique suppliers returned separately for each product keyword.",
+      "description": "Maximum number of unique suppliers collected separately for each keyword. This is not a limit for the whole batch.",
       "default": 10,
       "minimum": 1,
       "maximum": 500
@@ -35,7 +35,7 @@
     "maxPagesText": {
       "title": "Maximum pages per keyword",
       "type": "integer",
-      "description": "Maximum number of Made-in-China result pages processed for each keyword.",
+      "description": "Maximum Made-in-China result pages processed for each keyword. The Actor stops sooner when the supplier target is reached; higher values take more time.",
       "default": 1,
       "minimum": 1,
       "maximum": 99
@@ -43,18 +43,18 @@
     "uploadedImages": {
       "title": "Product images",
       "type": "array",
-      "description": "Used in image mode. Upload up to 20 clear JPG, PNG, WebP, GIF, or BMP product images. WebP and GIF files are converted automatically because Made-in-China accepts JPG, PNG, and BMP uploads. Each image is searched separately.",
+      "description": "Used only in Image search. Upload up to 20 clear JPG, PNG, WebP, GIF, or BMP product images. Each image is searched separately. WebP and GIF files are converted automatically. To use public web images, add them below.",
       "editor": "fileupload",
       "items": {"type": "string"},
       "maxItems": 20,
       "prefill": [],
       "sectionCaption": "Image search",
-      "sectionDescription": "These fields are used only when Search mode is Image search."
+      "sectionDescription": "These fields are used only when Search mode is Image search. Add at least one uploaded image or public image URL before starting the run."
     },
     "imageUrls": {
       "title": "Public product image URLs",
       "type": "array",
-      "description": "Used in image mode and recommended for API or MCP clients. Add direct, publicly accessible HTTP or HTTPS image URLs. The combined upload and URL limit is 20 images.",
+      "description": "Used only in Image search and recommended for MCP/API clients. Add one direct, publicly accessible HTTP or HTTPS image URL per row. Uploaded files and URLs share a combined limit of 20 images.",
       "editor": "stringList",
       "items": {"type": "string", "pattern": "^https?://"},
       "maxItems": 20,
@@ -63,7 +63,7 @@
     "maxUniqueSuppliersPerImage": {
       "title": "Maximum suppliers per image",
       "type": "integer",
-      "description": "Maximum number of unique suppliers returned separately for each image.",
+      "description": "Maximum number of unique suppliers collected separately for each uploaded image or public image URL. This is not a limit for the whole batch.",
       "default": 10,
       "minimum": 1,
       "maximum": 500
@@ -71,7 +71,7 @@
     "maxPagesImage": {
       "title": "Maximum result batches per image",
       "type": "integer",
-      "description": "Each Made-in-China image-search batch contains up to 20 products. The website currently provides at most five batches.",
+      "description": "Maximum image-result batches processed separately for each image. Each batch contains up to 20 products and the website currently provides at most five batches. The Actor stops sooner when the supplier target is reached.",
       "default": 1,
       "minimum": 1,
       "maximum": 5
@@ -79,7 +79,7 @@
     "useApifyProxy": {
       "title": "Use Apify Proxy",
       "type": "boolean",
-      "description": "Recommended for more reliable access when Made-in-China limits direct traffic.",
+      "description": "Recommended, especially for larger keyword or image batches, because Made-in-China may limit or challenge direct traffic.",
       "default": true,
       "sectionCaption": "Run settings",
       "sectionDescription": "Shared behavior for keyword and image searches."
@@ -87,33 +87,33 @@
     "includeSupplierDetails": {
       "title": "Include supplier profile details",
       "type": "boolean",
-      "description": "Visit each accepted public supplier profile to add business type, main products, location, establishment year, employee count, address, member history, rating, and response time. Disable for faster runs.",
+      "description": "Visit every accepted public supplier profile to add business type, main products, location, establishment information, employee count, address, member history, rating, response time, and company description. Disable for faster listing-only runs.",
       "default": true
     },
     "skipFailedImages": {
       "title": "Skip failed images",
       "type": "boolean",
-      "description": "Continue with the remaining images if one image cannot be downloaded, uploaded, or searched.",
+      "description": "Used only in Image search. Continue with remaining images when one image cannot be downloaded, converted, uploaded, or searched. Disable to fail immediately.",
       "default": true
     },
     "failOnNoResults": {
-      "title": "Fail when no results are found",
+      "title": "Strict failure mode",
       "type": "boolean",
-      "description": "When enabled, fail the run if no usable supplier rows are produced. Otherwise, finish with a warning and diagnostic files.",
+      "description": "Enable for automations that should fail when the full run produces no usable supplier rows. Leave disabled to finish with a warning, keep successful inputs, and save diagnostics.",
       "default": false
     },
     "saveCsvFile": {
       "title": "Save CSV files",
       "type": "boolean",
-      "description": "Save CSV files to the run's key-value store in addition to the structured dataset.",
-      "default": false,
+      "description": "Save CSV files in the run's key-value store. Enabled by default so every run creates a named file in addition to the structured Apify dataset. The CSV settings below are ignored when this is disabled.",
+      "default": true,
       "sectionCaption": "CSV export",
       "sectionDescription": "Optional file exports. Dataset output is always available."
     },
     "csvOutputMode": {
       "title": "CSV output mode",
       "type": "string",
-      "description": "Save one combined CSV, separate files for each keyword or image, or both.",
+      "description": "Used only when Save CSV files is enabled. Choose one combined file, one file per keyword or image, or both.",
       "enum": ["combined", "separate", "both"],
       "enumTitles": ["Combined CSV", "Separate CSV files", "Combined and separate files"],
       "default": "combined",
@@ -122,7 +122,7 @@
     "csvFilename": {
       "title": "Combined CSV filename",
       "type": "string",
-      "description": "Filename used when a combined CSV is requested.",
+      "description": "Used only for Combined CSV or Combined and separate files. Separate-only exports use filenames derived from each keyword or image.",
       "default": "made_in_china_results.csv",
       "minLength": 1,
       "maxLength": 160,
