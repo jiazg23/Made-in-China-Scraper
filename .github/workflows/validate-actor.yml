@@ -1,0 +1,47 @@
+name: Validate Apify Actor
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate Actor JSON files
+        run: |
+          python -m json.tool .actor/actor.json > /dev/null
+          python -m json.tool .actor/INPUT_SCHEMA.json > /dev/null
+          python -m json.tool .actor/OUTPUT_SCHEMA.json > /dev/null
+          python -m json.tool .actor/DATASET_SCHEMA.json > /dev/null
+
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Validate Python syntax
+        run: python -m py_compile src/main.py src/parsing.py tests/test_parsing.py tests/test_images.py
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Build Actor image
+        run: docker build --tag made-in-china-supplier-finder:test .
+
+      - name: Smoke-test Actor startup
+        run: |
+          test "$(docker image inspect --format '{{json .Config.Entrypoint}}' made-in-china-supplier-finder:test)" = 'null'
+          test "$(docker image inspect --format '{{json .Config.Cmd}}' made-in-china-supplier-finder:test)" = '["python","-u","src/main.py"]'
+          docker run --rm --entrypoint python made-in-china-supplier-finder:test -c \
+            "import apify, bs4, PIL, requests; print('dependencies ok')"
+          startup_output="$(docker run --rm -e ACTOR_STARTUP_CHECK=1 made-in-china-supplier-finder:test 2>&1)"
+          printf '%s\n' "$startup_output"
+          grep -F "Launching Made-in-China Product & Supplier Finder process." <<< "$startup_output"

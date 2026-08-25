@@ -1,0 +1,20 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "Made-in-China Product & Supplier Finder output",
+  "description": "Links to the structured supplier dataset and optional CSV or diagnostic files created by the run.",
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "string",
+      "title": "Supplier results",
+      "description": "Structured Made-in-China product and supplier records from the default dataset.",
+      "template": "{{links.apiDefaultDatasetUrl}}/items"
+    },
+    "files": {
+      "type": "string",
+      "title": "CSV and diagnostic files",
+      "description": "Optional CSV exports, the run summary, and any diagnostic HTML saved by the Actor.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/keys"
+    }
+  }
+}

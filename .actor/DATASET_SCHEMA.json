@@ -1,0 +1,266 @@
+{
+  "actorSpecification": 1,
+  "title": "Made-in-China product and supplier results",
+  "description": "One row per unique Made-in-China supplier, with normalized sourcing fields and every matched product preserved.",
+  "fields": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "search_input": {
+        "type": "string",
+        "title": "Search input",
+        "description": "The first keyword or image filename that matched this supplier."
+      },
+      "search_type": {
+        "type": "string",
+        "title": "Search type",
+        "enum": ["keyword", "image"]
+      },
+      "matched_search_inputs": {
+        "type": "array",
+        "title": "Matched search inputs",
+        "description": "Every keyword or image filename that matched this supplier.",
+        "items": {"type": "string"}
+      },
+      "name": {
+        "type": "string",
+        "title": "Product name",
+        "description": "The first product title matched for this supplier."
+      },
+      "product_id": {
+        "type": ["string", "null"],
+        "title": "Product ID",
+        "description": "Made-in-China product identifier parsed from the listing."
+      },
+      "product_url": {
+        "type": "string",
+        "title": "Product URL",
+        "description": "Canonical Made-in-China product listing URL."
+      },
+      "product_image_url": {
+        "type": ["string", "null"],
+        "title": "Product image",
+        "description": "Primary public product image URL."
+      },
+      "price": {
+        "type": "string",
+        "title": "Displayed price",
+        "description": "Price or price range exactly as displayed."
+      },
+      "price_min": {
+        "type": ["number", "null"],
+        "title": "Minimum price"
+      },
+      "price_max": {
+        "type": ["number", "null"],
+        "title": "Maximum price"
+      },
+      "currency": {
+        "type": ["string", "null"],
+        "title": "Currency",
+        "description": "ISO currency code inferred from the displayed price."
+      },
+      "min_order": {
+        "type": "string",
+        "title": "Minimum order",
+        "description": "Minimum order exactly as displayed."
+      },
+      "moq_quantity": {
+        "type": ["number", "null"],
+        "title": "MOQ quantity"
+      },
+      "moq_unit": {
+        "type": ["string", "null"],
+        "title": "MOQ unit"
+      },
+      "product_attributes": {
+        "type": "object",
+        "title": "Product attributes",
+        "description": "Visible product specifications such as material, finish, warranty, and size.",
+        "additionalProperties": {"type": "string"}
+      },
+      "secured_trading": {
+        "type": "boolean",
+        "title": "Secured Trading",
+        "description": "Whether the listing displays Made-in-China's Secured Trading indicator."
+      },
+      "is_sponsored": {
+        "type": "boolean",
+        "title": "Sponsored result"
+      },
+      "match_rank": {
+        "type": ["integer", "null"],
+        "title": "Match rank"
+      },
+      "result_page": {
+        "type": ["integer", "null"],
+        "title": "Result page or batch"
+      },
+      "vendor_name": {
+        "type": "string",
+        "title": "Supplier name"
+      },
+      "vendor_profile_url": {
+        "type": "string",
+        "title": "Supplier profile URL",
+        "description": "Canonical public Made-in-China supplier profile URL."
+      },
+      "company_id": {
+        "type": ["string", "null"],
+        "title": "Company ID"
+      },
+      "audited_supplier": {
+        "type": "boolean",
+        "title": "Audited Supplier",
+        "description": "Whether Made-in-China displays the Audited Supplier badge."
+      },
+      "leading_factory": {
+        "type": "boolean",
+        "title": "Leading Factory",
+        "description": "Whether Made-in-China displays its Industry-leading Audited Factory badge."
+      },
+      "member_type": {
+        "type": ["string", "null"],
+        "title": "Member type",
+        "description": "Displayed membership such as Gold Member or Diamond Member."
+      },
+      "member_since": {
+        "type": ["integer", "null"],
+        "title": "Member since"
+      },
+      "supplier_rating": {
+        "type": ["number", "null"],
+        "title": "Supplier rating"
+      },
+      "supplier_capability_index": {
+        "type": ["integer", "null"],
+        "title": "Supplier capability index",
+        "description": "Number of capability stars visibly displayed by Made-in-China."
+      },
+      "supplier_from": {
+        "type": "string",
+        "title": "Supplier location"
+      },
+      "business_type": {
+        "type": "string",
+        "title": "Business type"
+      },
+      "main_products": {
+        "type": "array",
+        "title": "Main products",
+        "items": {"type": "string"}
+      },
+      "year_established": {
+        "type": ["string", "null"],
+        "title": "Year established"
+      },
+      "employee_count": {
+        "type": ["integer", "null"],
+        "title": "Employees"
+      },
+      "address": {
+        "type": ["string", "null"],
+        "title": "Company address",
+        "description": "Public company address displayed on the supplier profile."
+      },
+      "average_response_time": {
+        "type": ["string", "null"],
+        "title": "Average response time"
+      },
+      "supplier_capability_tags": {
+        "type": "array",
+        "title": "Supplier capability tags",
+        "description": "Visible capability labels such as ODM Services or Customization from Samples.",
+        "items": {"type": "string"}
+      },
+      "company_description": {
+        "type": ["string", "null"],
+        "title": "Company description"
+      },
+      "matched_products": {
+        "type": "array",
+        "title": "Matched products",
+        "description": "Every distinct product match retained for this supplier and source input.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "search_input": {"type": "string"},
+            "search_type": {"type": "string", "enum": ["keyword", "image"]},
+            "product_id": {"type": ["string", "null"]},
+            "name": {"type": "string"},
+            "product_url": {"type": "string"},
+            "product_image_url": {"type": ["string", "null"]},
+            "price": {"type": "string"},
+            "price_min": {"type": ["number", "null"]},
+            "price_max": {"type": ["number", "null"]},
+            "currency": {"type": ["string", "null"]},
+            "min_order": {"type": "string"},
+            "moq_quantity": {"type": ["number", "null"]},
+            "moq_unit": {"type": ["string", "null"]},
+            "product_attributes": {"type": "object"},
+            "secured_trading": {"type": "boolean"},
+            "is_sponsored": {"type": "boolean"},
+            "match_rank": {"type": ["integer", "null"]},
+            "result_page": {"type": ["integer", "null"]}
+          }
+        }
+      }
+    },
+    "required": [
+      "search_input",
+      "search_type",
+      "name",
+      "product_url",
+      "vendor_name",
+      "vendor_profile_url",
+      "price",
+      "min_order",
+      "audited_supplier",
+      "matched_search_inputs",
+      "matched_products"
+    ]
+  },
+  "views": {
+    "overview": {
+      "title": "Supplier results",
+      "description": "Unique suppliers with product matches, audit status, normalized prices and MOQs, membership, and profile details.",
+      "transformation": {
+        "fields": [
+          "product_image_url",
+          "name",
+          "vendor_name",
+          "audited_supplier",
+          "leading_factory",
+          "member_type",
+          "supplier_rating",
+          "price",
+          "min_order",
+          "business_type",
+          "supplier_from",
+          "product_url",
+          "vendor_profile_url",
+          "search_input"
+        ]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "product_image_url": {"label": "Image", "format": "image"},
+          "name": {"label": "Product", "format": "text"},
+          "vendor_name": {"label": "Supplier", "format": "text"},
+          "audited_supplier": {"label": "Audited", "format": "boolean"},
+          "leading_factory": {"label": "Leading factory", "format": "boolean"},
+          "member_type": {"label": "Member", "format": "text"},
+          "supplier_rating": {"label": "Rating", "format": "number"},
+          "price": {"label": "Price", "format": "text"},
+          "min_order": {"label": "MOQ", "format": "text"},
+          "business_type": {"label": "Business type", "format": "text"},
+          "supplier_from": {"label": "Location", "format": "text"},
+          "product_url": {"label": "Product link", "format": "link"},
+          "vendor_profile_url": {"label": "Supplier link", "format": "link"},
+          "search_input": {"label": "First match", "format": "text"}
+        }
+      }
+    }
+  }
+}
