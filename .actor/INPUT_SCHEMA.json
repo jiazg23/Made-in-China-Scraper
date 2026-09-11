@@ -16,13 +16,14 @@
     "searchTerms": {
       "title": "Product keywords",
       "type": "array",
-      "description": "Used only in Keyword search. Add one specific product query per row, such as stainless steel glass shower hinge. Image searches ignore this field.",
+      "description": "Used only in Keyword search. The preset is monitors; replace it with your own product queries. Empty keyword input uses monitors. Image searches ignore this field.",
       "editor": "stringList",
       "items": {"type": "string", "minLength": 1},
       "maxItems": 20,
-      "prefill": [],
+      "default": ["monitors"],
+      "prefill": ["monitors"],
       "sectionCaption": "Keyword search",
-      "sectionDescription": "These fields are used only when Search mode is Keyword search. Enter at least one product keyword before starting the run."
+      "sectionDescription": "These fields are used only when Search mode is Keyword search. Start with monitors or enter your own product keywords."
     },
     "maxUniqueSuppliersPerKeyword": {
       "title": "Maximum suppliers per keyword",

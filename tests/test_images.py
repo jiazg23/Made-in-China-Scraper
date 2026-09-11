@@ -19,9 +19,28 @@ class ImagePreparationTests(unittest.TestCase):
             normalize_actor_input({"searchTerms": ["hinge"], "saveCsvFile": False})["saveCsvFile"]
         )
 
-    def test_selected_search_mode_requires_matching_input(self):
-        with self.assertRaisesRegex(ValueError, "at least one product keyword"):
-            normalize_actor_input({"searchMode": "keyword", "searchTerms": []})
+    def test_default_keyword_run_uses_monitors(self):
+        for actor_input in (None, {}, {"searchMode": "keyword"},
+                            {"searchMode": "keyword", "searchTerms": []},
+                            {"searchMode": "keyword", "searchTerms": ["  "]}):
+            with self.subTest(actor_input=actor_input):
+                result = normalize_actor_input(actor_input)
+                self.assertEqual(result["searchMode"], "keyword")
+                self.assertEqual(result["searchTerms"], ["monitors"])
+                self.assertEqual(result["maxUniqueSuppliersPerKeyword"], 10)
+
+    def test_explicit_keyword_is_preserved(self):
+        result = normalize_actor_input({"searchTerms": ["solar panel"]})
+        self.assertEqual(result["searchTerms"], ["solar panel"])
+
+    def test_image_search_does_not_use_keyword_preset(self):
+        result = normalize_actor_input({
+            "searchMode": "image", "imageUrls": ["https://example.com/product.jpg"]
+        })
+        self.assertEqual(result["searchMode"], "image")
+        self.assertEqual(result["searchTerms"], [])
+
+    def test_image_mode_still_requires_matching_input(self):
         with self.assertRaisesRegex(ValueError, "at least one uploaded image"):
             normalize_actor_input({"searchMode": "image", "uploadedImages": [], "imageUrls": []})
 

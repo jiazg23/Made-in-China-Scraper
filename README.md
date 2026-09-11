@@ -229,7 +229,7 @@ Clear, tightly cropped, product-only images usually produce better results than 
 | Field | Purpose | Default |
 |---|---|---|
 | `searchMode` | `keyword` or `image` | `keyword` |
-| `searchTerms` | Product queries used in keyword mode | `[]` — user input required |
+| `searchTerms` | Product queries used in keyword mode; replace the preset with your own | `["monitors"]` |
 | `maxUniqueSuppliersPerKeyword` | Separate supplier cap for each keyword | `10` |
 | `maxPagesText` | Result pages processed per keyword | `1` |
 | `uploadedImages` | Product images uploaded through Apify Console | `[]` |
@@ -244,7 +244,7 @@ Clear, tightly cropped, product-only images usually produce better results than 
 | `csvOutputMode` | `combined`, `separate`, or `both` | `combined` |
 | `csvFilename` | Combined CSV filename | `made_in_china_results.csv` |
 
-Fields belonging to the unselected search mode are ignored. Keyword mode requires at least one keyword, and image mode requires at least one uploaded image or public image URL. The Actor has no separate internal runtime limit; use Apify's native **Timeout** or **No timeout** setting as the single source of truth.
+Fields belonging to the unselected search mode are ignored. Keyword mode starts with the editable preset `monitors`. If keywords are omitted or empty, the Actor uses `monitors` and logs a warning. Image mode still requires at least one uploaded image or public image URL and never falls back to keyword search. The Actor has no separate internal runtime limit; use Apify's native **Timeout** or **No timeout** setting as the single source of truth.
 
 ## Output
 
