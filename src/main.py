@@ -40,6 +40,7 @@ from parsing import (
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
+DEFAULT_SEARCH_TERM = "monitors"
 BASE_URL = "https://www.made-in-china.com"
 TEXT_SEARCH_URL = f"{BASE_URL}/productdirectory.do"
 IMAGE_UPLOAD_URL = "https://file.made-in-china.com/img-search/upload"
@@ -118,7 +119,12 @@ def normalize_actor_input(actor_input: dict | None) -> dict:
     image_urls = normalize_string_list(result.get("imageUrls"))
 
     if search_mode == "keyword" and not search_terms:
-        raise ValueError("Keyword search requires at least one product keyword.")
+        search_terms = [DEFAULT_SEARCH_TERM]
+        Actor.log.warning(
+            "No product keywords provided. Using the preset query: %s. "
+            "Set searchTerms to search for another product.",
+            DEFAULT_SEARCH_TERM,
+        )
 
     if search_mode == "image" and not (
         uploaded_images
