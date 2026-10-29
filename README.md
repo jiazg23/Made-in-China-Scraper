@@ -237,6 +237,7 @@ Clear, tightly cropped, product-only images usually produce better results than 
 | `maxUniqueSuppliersPerImage` | Separate supplier cap for each image | `10` |
 | `maxPagesImage` | Result batches per image; up to 20 listings per batch | `1` |
 | `useApifyProxy` | Use Apify Proxy for Made-in-China requests | `true` |
+| `proxyConfiguration` | Explicit Apify/custom proxy settings; overrides `useApifyProxy` | Not set (uses legacy switch) |
 | `includeSupplierDetails` | Visit accepted public supplier profiles for additional company fields | `true` |
 | `skipFailedImages` | Continue when one image fails | `true` |
 | `failOnNoResults` | Fail rather than warn when the final dataset is empty | `false` |
@@ -359,6 +360,25 @@ When `includeSupplierDetails` is enabled, the Actor visits the public profile of
 ## Reliability and troubleshooting
 
 Made-in-China can change its HTML or return traffic challenges. Results may vary by location, proxy, current listings, and current site layout.
+
+### HTTP 403 during startup or search
+
+The homepage warm-up is optional. If it returns HTTP 403 or a traffic challenge, the Actor saves `warm_up_debug.html`, records the failure in `RUN_SUMMARY.json`, and attempts the actual search. Keyword failures include their HTTP status and URL in the summary. With `failOnNoResults: false`, an empty run finishes with a warning and diagnostics; strict mode fails only after the full run produces no supplier rows.
+
+Made-in-China requests use `curl_cffi` with a Chrome TLS/HTTP2 fingerprint, matching browser headers, and persistent cookies. This is an HTTP client: it does not execute JavaScript or solve CAPTCHAs. Public image downloads continue to use the separate, size-limited and URL-validated download path.
+
+If search requests still return 403, try another proxy group or your own proxy using the new **Proxy configuration** field. For example, add the following to an existing input if your Apify account has residential proxy access:
+
+```json
+"proxyConfiguration": {
+  "useApifyProxy": true,
+  "apifyProxyGroups": ["RESIDENTIAL"]
+}
+```
+
+This field overrides the legacy `useApifyProxy` switch, including when explicitly configured to disable proxies. Omitting it preserves the existing input behavior and does not automatically select a paid residential group. Residential traffic has separate usage charges. A sticky proxy session keeps the egress IP and cookies together during the run. Proxy initialization errors fail with an actionable message instead of silently switching to direct requests.
+
+After updating the source, rebuild the Actor in Apify and run the new build; an existing build image will continue to use the old code.
 
 For the most reliable runs:
 

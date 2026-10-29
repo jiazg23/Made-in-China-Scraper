@@ -14,11 +14,16 @@ import shutil
 import socket
 import struct
 import tempfile
+import time
+import uuid
+from contextlib import closing
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
 import requests
 from apify import Actor
+from curl_cffi import CurlMime, requests as browser_requests
+from curl_cffi.requests.exceptions import RequestException as BrowserRequestException
 from PIL import Image, ImageOps
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -70,10 +75,13 @@ atexit.register(_cleanup_temporary_directories)
 
 
 class FetchError(RuntimeError):
-    def __init__(self, message: str, *, url: str = "", body: str = "") -> None:
+    def __init__(
+        self, message: str, *, url: str = "", body: str = "", status_code: int | None = None,
+    ) -> None:
         super().__init__(message)
         self.url = url
         self.body = body
+        self.status_code = status_code
 
 
 def clean_text(value: str | None) -> str:
@@ -170,22 +178,35 @@ def normalize_actor_input(actor_input: dict | None) -> dict:
     return result
 
 
-async def get_proxy_url(use_apify_proxy: bool) -> str | None:
-    if not use_apify_proxy:
+async def get_proxy_url(use_apify_proxy: bool, proxy_input: dict | None = None) -> str | None:
+    # Explicit settings take precedence over the legacy on/off switch.
+    if proxy_input is None and not use_apify_proxy:
         return None
 
     try:
-        proxy_configuration = await Actor.create_proxy_configuration()
+        proxy_configuration = await Actor.create_proxy_configuration(actor_proxy_input=proxy_input)
         if not proxy_configuration:
-            Actor.log.warning("Apify Proxy could not be initialized. Continuing without it.")
             return None
-        proxy_url = await proxy_configuration.new_url()
+        # Keep cookies and the egress IP together throughout the run.
+        proxy_url = await proxy_configuration.new_url(session_id=uuid.uuid4().hex)
         if proxy_url:
-            Actor.log.info("Apify Proxy is enabled for Made-in-China requests.")
+            Actor.log.info("Proxy is enabled for Made-in-China requests (sticky session).")
             return proxy_url
-    except Exception as exc:
-        Actor.log.warning("Apify Proxy could not be initialized. Continuing without it: %s", exc)
-    return None
+    except Exception:
+        # SDK/provider exceptions may contain proxy credentials.
+        raise RuntimeError("Proxy initialization failed. Check proxyConfiguration and your proxy access.") from None
+    raise RuntimeError("Proxy configuration did not provide a URL.")
+
+
+def build_mic_session(proxy_url: str | None = None) -> browser_requests.Session:
+    # A User-Agent header alone does not give requests a browser TLS/HTTP2 fingerprint.
+    # Let curl_cffi supply a matching Chrome fingerprint and default headers.
+    return browser_requests.Session(
+        impersonate="chrome",
+        trust_env=False,
+        proxy=proxy_url,
+        headers={"Accept-Language": "en-US,en;q=0.9"},
+    )
 
 
 def build_http_session(proxy_url: str | None = None, user_agent: str | None = None) -> requests.Session:
@@ -235,24 +256,41 @@ def is_challenge_or_error_page(html: str) -> bool:
 
 
 class MadeInChinaClient:
-    def __init__(self, session: requests.Session) -> None:
+    def __init__(self, session: browser_requests.Session) -> None:
         self.session = session
 
     def _get(self, url: str, *, params: dict | None = None) -> str:
-        try:
-            response = self.session.get(url, params=params, timeout=REQUEST_TIMEOUT)
-        except requests.RequestException as exc:
-            raise FetchError(f"Request failed: {exc}", url=url) from exc
+        # Retry transient GET failures only; repeated 403s on one IP do not help.
+        for attempt in range(4):
+            try:
+                response = self.session.get(url, params=params, timeout=REQUEST_TIMEOUT)
+            except BrowserRequestException:
+                if attempt == 3:
+                    raise FetchError("Made-in-China request failed after 4 attempts.", url=url) from None
+            else:
+                if response.status_code not in {429, 500, 502, 503, 504} or attempt == 3:
+                    break
+            time.sleep(0.8 * (2 ** attempt))
 
         body = response.text
         if response.status_code >= 400:
+            message = f"Made-in-China returned HTTP {response.status_code}."
+            if response.status_code == 403:
+                message += (
+                    " Try a different proxy via proxyConfiguration;"
+                    " RESIDENTIAL requires access to that group."
+                )
             raise FetchError(
-                f"Made-in-China returned HTTP {response.status_code}.",
+                message,
                 url=response.url,
                 body=body,
+                status_code=response.status_code,
             )
         if is_challenge_or_error_page(body):
-            raise FetchError("Made-in-China returned a traffic challenge or error page.", url=response.url, body=body)
+            raise FetchError(
+                "Made-in-China returned a traffic challenge or error page.",
+                url=response.url, body=body, status_code=response.status_code,
+            )
         return body
 
     def warm_up(self) -> None:
@@ -294,22 +332,27 @@ class MadeInChinaClient:
         }
 
         try:
-            with path.open("rb") as image_file:
+            with closing(CurlMime()) as multipart:
+                multipart.addpart(
+                    name="multipartFile", filename=path.name,
+                    content_type=mime_type, local_path=str(path),
+                )
                 response = self.session.post(
                     IMAGE_UPLOAD_URL,
                     params={"lan": "en"},
-                    files={"multipartFile": (path.name, image_file, mime_type)},
+                    multipart=multipart,
                     data=data,
                     timeout=REQUEST_TIMEOUT,
                 )
-        except requests.RequestException as exc:
-            raise FetchError(f"Image upload failed: {exc}", url=IMAGE_UPLOAD_URL) from exc
+        except BrowserRequestException:
+            raise FetchError("Made-in-China image upload request failed.", url=IMAGE_UPLOAD_URL) from None
 
         if response.status_code >= 400:
             raise FetchError(
                 f"Image upload returned HTTP {response.status_code}.",
                 url=response.url,
                 body=response.text,
+                status_code=response.status_code,
             )
 
         try:
@@ -719,6 +762,7 @@ async def run_keyword_searches(
         rank_offset = 0
         pages_processed = 0
         status = "completed"
+        error_details: dict = {}
 
         for page in range(1, max_pages + 1):
             html = ""
@@ -734,8 +778,9 @@ async def run_keyword_searches(
                 await save_debug_text(f"keyword_{term}_page_{page}", exc.body)
                 Actor.log.warning("Keyword search failed for %r on page %s: %s", term, page, exc)
                 status = "failed"
-                if actor_input["failOnNoResults"]:
-                    raise
+                error_details = {
+                    "error": str(exc), "url": exc.url, "http_status": exc.status_code,
+                }
                 break
 
             pages_processed += 1
@@ -753,6 +798,7 @@ async def run_keyword_searches(
                 break
 
         summary[term] = {
+            **error_details,
             "status": status,
             "pages_processed": pages_processed,
             "unique_suppliers": len(seen_for_term),
@@ -945,8 +991,8 @@ async def main() -> None:
                 len(actor_input["searchTerms"]),
             )
 
-        proxy_url = await get_proxy_url(actor_input["useApifyProxy"])
-        session = build_http_session(proxy_url=proxy_url)
+        proxy_url = await get_proxy_url(actor_input["useApifyProxy"], actor_input.get("proxyConfiguration"))
+        session = build_mic_session(proxy_url=proxy_url)
         client = MadeInChinaClient(session)
         suppliers_by_key: dict[str, dict] = {}
         run_summary: dict = {
@@ -956,7 +1002,16 @@ async def main() -> None:
         }
 
         try:
-            client.warm_up()
+            try:
+                client.warm_up()
+            except FetchError as exc:
+                # The homepage can be blocked while a search endpoint still works.
+                await save_debug_text("warm_up", exc.body)
+                run_summary["warm_up"] = {
+                    "status": "failed", "error": str(exc),
+                    "url": exc.url, "http_status": exc.status_code,
+                }
+                Actor.log.warning("Homepage warm-up failed; continuing with search: %s", exc)
             if actor_input["searchMode"] == "image":
                 run_summary["inputs"] = await run_image_searches(client, actor_input, suppliers_by_key)
             else:
