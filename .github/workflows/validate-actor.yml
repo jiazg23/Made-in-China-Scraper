@@ -28,7 +28,7 @@ jobs:
         run: python -m pip install -r requirements.txt
 
       - name: Validate Python syntax
-        run: python -m py_compile src/main.py src/parsing.py tests/test_parsing.py tests/test_images.py
+        run: python -m compileall -q src tests
 
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
@@ -41,7 +41,7 @@ jobs:
           test "$(docker image inspect --format '{{json .Config.Entrypoint}}' made-in-china-supplier-finder:test)" = 'null'
           test "$(docker image inspect --format '{{json .Config.Cmd}}' made-in-china-supplier-finder:test)" = '["python","-u","src/main.py"]'
           docker run --rm --entrypoint python made-in-china-supplier-finder:test -c \
-            "import apify, bs4, PIL, requests; print('dependencies ok')"
+            "import apify, bs4, PIL, requests, curl_cffi; print('dependencies ok')"
           startup_output="$(docker run --rm -e ACTOR_STARTUP_CHECK=1 made-in-china-supplier-finder:test 2>&1)"
           printf '%s\n' "$startup_output"
           grep -F "Launching Made-in-China Product & Supplier Scraper process." <<< "$startup_output"

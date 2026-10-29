@@ -80,10 +80,16 @@
     "useApifyProxy": {
       "title": "Use Apify Proxy",
       "type": "boolean",
-      "description": "Recommended, especially for larger keyword or image batches, because Made-in-China may limit or challenge direct traffic.",
+      "description": "Use the default Apify Proxy pool when no explicit Proxy configuration is supplied. Explicit proxyConfiguration settings take precedence.",
       "default": true,
       "sectionCaption": "Run settings",
       "sectionDescription": "Shared behavior for keyword and image searches."
+    },
+    "proxyConfiguration": {
+      "title": "Proxy configuration",
+      "type": "object",
+      "editor": "proxy",
+      "description": "Optional explicit proxy settings. Overrides Use Apify Proxy. If the default pool returns HTTP 403, select a different group (for example RESIDENTIAL, if available on your account) or provide your own proxies. Residential traffic has separate usage charges. Omit this field to keep the legacy on/off behavior."
     },
     "includeSupplierDetails": {
       "title": "Include supplier profile details",
